@@ -311,3 +311,8 @@ export function describe(event: DynetEvent): string {
       return `${where}: set to ${event.setpoint.toFixed(2)} °C`;
   }
 }
+
+/** The DyNet2 packet a gateway sends about every three seconds (cmd 0x82): not understood, and too frequent to log. */
+export function isHeartbeat(event: DynetEvent): boolean {
+  return event.kind === 'unknown' && event.packet[0] === 0xac && event.packet[2] === 0x82;
+}

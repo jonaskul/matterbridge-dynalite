@@ -9,6 +9,7 @@ import {
   dynet1Percent,
   dynet2Packet,
   DynetStreamDecoder,
+  isHeartbeat,
   fletcher16,
 } from '../src/dynet.js';
 
@@ -66,7 +67,10 @@ group('DyNet2 as read off a gateway', () => {
   });
 
   it('leaves the gateway heartbeat raw', () => {
-    expect(decode(bytes('ac 04 82 c3 00 46 aa 55 55 00 0c 00 00 00 00 00 00 00 c8 9b')).kind).toBe('unknown');
+    const beat = decode(bytes('ac 04 82 c3 00 46 aa 55 55 00 0c 00 00 00 00 00 00 00 c8 9b'));
+    expect(beat.kind).toBe('unknown');
+    expect(isHeartbeat(beat)).toBe(true);
+    expect(isHeartbeat(decode(dynet1Packet(5, 0x00)))).toBe(false);
   });
 });
 

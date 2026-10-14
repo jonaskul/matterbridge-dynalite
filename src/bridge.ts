@@ -5,7 +5,7 @@
  */
 
 import { type Area, deviceId, type Gateway } from './config.js';
-import { describe, type DynetEvent } from './dynet.js';
+import { describe, type DynetEvent, isHeartbeat } from './dynet.js';
 import { DynetLive } from './live.js';
 
 /** What the gateway can be asked and told (GatewayHttp, or a stand-in in tests). */
@@ -107,7 +107,7 @@ export class GatewayBridge {
         host: host.replace(/:\d+$/, ''), // the HTTP host may carry a port of its own
         port: dynetPort,
         onEvent: (e) => {
-          this.log.debug(`${this.gateway.name}: ${describe(e)}`);
+          if (!isHeartbeat(e)) this.log.debug(`${this.gateway.name}: ${describe(e)}`);
           this.handleEvent(e);
         },
         onConnected: (up) => this.log.info(`${this.gateway.name}: DyNet port ${dynetPort} ${up ? 'connected' : 'disconnected'}`),
