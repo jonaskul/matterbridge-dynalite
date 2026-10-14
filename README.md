@@ -27,6 +27,7 @@ A [Matterbridge](https://github.com/Luligu/matterbridge) plugin for **Signify Dy
 - Matterbridge 3.3.0 or later, on Node.js 20, 22 or 24.
 - A Dynalite Ethernet gateway whose web server can be reached from Matterbridge (PDEG, DDNG and similar, with `GetDyNet.cgi` / `SetDyNet.cgi`).
 - For live updates, a TCP server port set up on the gateway in its own configuration tool (e.g. System Builder/EnvisionProject): **Mode** Server, **Protocol** TCP, **Connection** *Trunk*, **Port type** DyNet or DyNet2, and a port number, e.g. 50000. A gateway can have several such ports. If another program already listens on one, give this plugin its own.
+  - **A new port needs routes.** In the gateway's routing table, route at least *Comm Port 1* (the DyNet bus), *Internal Messages* and the *Web Socket* port **to** the new port. Without them the port connects but sends only its own heartbeat. Copy the routes the gateway's existing trunk port has. No routes **from** the new port are needed: the plugin only listens.
 
 ## Installation
 
