@@ -62,6 +62,15 @@ describe('the devices of a gateway', () => {
     ]);
     expect(thermostats).toEqual([['dynalite-home-a18', { temperature: 21.3, setpoint: 20 }]]);
   });
+
+  it('say why when areas do not answer, and what the address may have wrong', async () => {
+    const { gateways } = readConfig({ gateways: [{ name: 'Home', host: 'gw:50000', areas: [{ area: 9 }] }] });
+    const warnings: string[] = [];
+    const failing = { getPreset: async () => Promise.reject(new Error('timed out')) } as unknown as GatewayApi;
+    const log = { info: () => undefined, debug: () => undefined, warn: (m: string) => void warnings.push(m) };
+    await new GatewayBridge(gateways[0], failing, { light: () => undefined, thermostat: () => undefined }, log, { readAfterMs: 0, staggerMs: 0 }).refreshAll();
+    expect(warnings).toEqual([expect.stringMatching(/1 of 1 areas did not answer \(timed out\)\. Is 50000 the gateway's web server\?/)]);
+  });
 });
 
 describe('the bus', () => {

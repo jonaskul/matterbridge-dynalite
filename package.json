@@ -1,7 +1,7 @@
 {
   "name": "matterbridge-dynalite",
   "version": "0.1.0",
-  "description": "Matterbridge plugin for Signify Dynalite (formerly Philips Dynalite): lights and heating straight from the Ethernet gateway, live over DyNet",
+  "description": "Signify Dynalite",
   "author": "https://github.com/jonaskul",
   "license": "Apache-2.0",
   "type": "module",

@@ -103,6 +103,9 @@ export function readConfig(raw: unknown): { gateways: Gateway[]; problems: strin
     }
     names.add(name.toLowerCase());
     const dynetPort = int(g.dynetPort, 1, 65535) ?? 0;
+    if (dynetPort && host.endsWith(`:${dynetPort}`)) {
+      problems.push(`Gateway "${name}": the address has the DyNet port (${dynetPort}) in it; the address is for the web pages (usually port 80), so leave the port out.`);
+    }
 
     const areas: Area[] = [];
     const seen = new Set<number>();

@@ -21,7 +21,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import initializePlugin from '../src/module.js';
-import { type DynalitePlatform, levelToPercent, percentToLevel } from '../src/platform.js';
+import { type DynalitePlatform, levelToPercent, percentToLevel, uniqueName } from '../src/platform.js';
 
 const bytes = (h: string) => Buffer.from(h.replace(/\s+/g, ''), 'hex');
 
@@ -135,5 +135,15 @@ describe('levels', () => {
     expect(percentToLevel(0)).toBe(1);
     expect(levelToPercent(254)).toBe(100);
     expect(percentToLevel(levelToPercent(190))).toBe(190);
+  });
+});
+
+describe('names', () => {
+  it('tell apart a light and a thermostat called after the same room', () => {
+    const taken = new Set<string>();
+    const d = (kind: 'onoff' | 'thermostat') => ({ id: kind, kind, name: 'Kontor', area: 3 }) as never;
+    expect(uniqueName(d('onoff'), taken)).toBe('Kontor');
+    expect(uniqueName(d('thermostat'), taken)).toBe('Kontor thermostat');
+    expect(uniqueName(d('thermostat'), taken)).toBe('Kontor 2');
   });
 });

@@ -84,7 +84,7 @@ Everything is set in the plugin's settings in the Matterbridge frontend, and sav
 | Gateway setting | | Default |
 |---|---|---|
 | `name` | Short and unique. It is part of every device's identity, so keep it once set. | |
-| `host` | The gateway's IP or host name, with `:port` if its web server is not on 80/443. | |
+| `host` | The gateway's IP or host name, with `:port` only if its web server is not on 80/443. Not the DyNet port. | |
 | `https`, `allowSelfSigned` | HTTPS, and whether to accept the gateway's self-signed certificate. | off |
 | `username`, `password` | Only if the gateway asks for HTTP authentication. | |
 | `dynetPort` | The gateway's DyNet TCP port for live updates. Leave it empty to poll only. | none |
@@ -94,7 +94,7 @@ Everything is set in the plugin's settings in the Matterbridge frontend, and sav
 | Area setting | | Default |
 |---|---|---|
 | `area` | The DyNet area number (1–65535). | |
-| `name` | The name shown in your controller. | |
+| `name` | The name shown in your controller. If a light and a thermostat share a name, the second gets " thermostat" or " light" added. | |
 | `type` | `light` or `thermostat`. | `light` |
 | `channels` | For lights: `channel`, `name` and `dimmable` (false for a relay). Leave it out to show the area as one light switched by presets. | |
 | `onPreset`, `offPreset` | For an area light without channels: the presets that switch it. | 1, 4 |

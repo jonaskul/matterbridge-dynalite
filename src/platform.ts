@@ -37,6 +37,16 @@ function fadeOf(transitionTime: number | null | undefined): number | undefined {
   return typeof transitionTime === 'number' ? transitionTime * 100 : undefined;
 }
 
+/** Matterbridge refuses a second device with the same name: a light and a thermostat both called after their room are told apart. */
+export function uniqueName(device: Device, taken: Set<string>): string {
+  const base = device.name;
+  const candidates = [base, device.kind === 'thermostat' ? `${base} thermostat` : `${base} light`];
+  let name = candidates.find((c) => !taken.has(c.toLowerCase()));
+  for (let i = 2; !name; i++) if (!taken.has(`${base} ${i}`.toLowerCase())) name = `${base} ${i}`;
+  taken.add(name.toLowerCase());
+  return name;
+}
+
 export class DynalitePlatform extends MatterbridgeDynamicPlatform {
   private readonly bridges: GatewayBridge[] = [];
   private readonly endpoints = new Map<string, MatterbridgeEndpoint>();
@@ -60,6 +70,7 @@ export class DynalitePlatform extends MatterbridgeDynamicPlatform {
 
     const { gateways, problems } = readConfig(this.config);
     for (const p of problems) this.log.warn(p);
+    const names = new Set<string>();
 
     for (const gw of gateways) {
       const api = new GatewayHttp({
@@ -80,6 +91,11 @@ export class DynalitePlatform extends MatterbridgeDynamicPlatform {
       );
       this.bridges.push(bridge);
       for (const device of bridge.devices) {
+        const name = uniqueName(device, names);
+        if (name !== device.name) {
+          this.log.info(`${device.name} (area ${device.area}${device.channel !== undefined ? ` ch ${device.channel}` : ''}): the name is taken, shown as "${name}"`);
+          device.name = name;
+        }
         if (!this.validateDevice([device.name, device.id])) continue;
         const endpoint = this.createEndpoint(bridge, device);
         this.setSelectDevice(device.id, device.name, undefined, device.kind === 'thermostat' ? 'hub' : 'wifi');

@@ -51,6 +51,11 @@ describe('the configuration', () => {
     expect(readConfig({}).problems[0]).toMatch(/No gateways/);
   });
 
+  it('says when the address carries the DyNet port', () => {
+    const { problems } = readConfig({ gateways: [{ name: 'A', host: '10.0.0.5:50000', dynetPort: 50000, areas: [{ area: 1 }] }] });
+    expect(problems).toEqual([expect.stringMatching(/DyNet port \(50000\).*leave the port out/)]);
+  });
+
   it('gives every device a stable identity', () => {
     expect(deviceId('12D Home!', 9, 1)).toBe('dynalite-12d-home-a9-c1');
     expect(deviceId('12D Home!', 18)).toBe('dynalite-12d-home-a18');

@@ -9,3 +9,4 @@ First version.
 - Live updates from the gateway's DyNet TCP port (DyNet 1 and DyNet2), with a read-back after fades.
 - Commands and reads over the gateway's HTTP API, one request at a time.
 - Several gateways; devices identified by gateway name, area and channel.
+- Two devices with the same name (a room's light and its thermostat) are told apart, as Matterbridge refuses the second.

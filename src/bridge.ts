@@ -185,6 +185,7 @@ export class GatewayBridge {
 
   async refreshAll(): Promise<void> {
     let failed = 0;
+    let first = '';
     for (const [i, area] of [...this.byArea.keys()].entries()) {
       if (this.stopped) return;
       if (i > 0 && this.timing.staggerMs > 0) await sleep(this.timing.staggerMs);
@@ -192,10 +193,15 @@ export class GatewayBridge {
         await this.refreshArea(area);
       } catch (err) {
         failed++;
+        first ||= (err as Error).message;
         this.log.debug(`${this.gateway.name}: area ${area}: ${(err as Error).message}`);
       }
     }
-    if (failed) this.log.warn(`${this.gateway.name}: ${failed} of ${this.byArea.size} areas did not answer`);
+    if (failed) {
+      const port = /:(\d+)$/.exec(this.gateway.host)?.[1];
+      const hint = port && !['80', '443'].includes(port) ? ` Is ${port} the gateway's web server? Its web pages are usually on 80; leave the port out of the address.` : '';
+      this.log.warn(`${this.gateway.name}: ${failed} of ${this.byArea.size} areas did not answer (${first}).${hint}`);
+    }
   }
 
   async refreshArea(area: number): Promise<void> {
