@@ -156,10 +156,8 @@ export class GatewayBridge {
         return;
       case 'channel': {
         const hit = devices.filter((d) => d.channel !== undefined && (event.channel === undefined || d.channel === event.channel));
-        const level = event.reported ? (event.current ?? event.level) : event.level;
-        for (const d of hit) this.showLevel(d, level);
-        // A command (not an answer) fades: read back once it is done, to show where it ended.
-        if (!event.reported && hit.length) this.readArea(event.area, event.fade);
+        // Where it is going, also from an answer given mid-fade: nothing else will come once it gets there.
+        for (const d of hit) this.showLevel(d, event.level);
         return;
       }
       case 'stop':

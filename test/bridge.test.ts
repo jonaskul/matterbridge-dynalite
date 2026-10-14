@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type DeviceSink, GatewayBridge, type GatewayApi } from '../src/bridge.js';
 import { readConfig } from '../src/config.js';
-import { decode } from '../src/dynet.js';
+import { decode, dynet2Packet } from '../src/dynet.js';
 
 const bytes = (h: string) => Uint8Array.from(h.trim().split(/\s+/), (b) => parseInt(b, 16));
 
@@ -94,14 +94,19 @@ describe('the bus', () => {
     ]);
   });
 
-  it('shows a level at once and reads the area once the fade is done', async () => {
+  it('shows a level at once, where it is going, without reading it back', async () => {
     const { bridge, api, lights } = setup();
     bridge.handleEvent(decode(bytes('ac 04 10 c3 00 46 00 09 ff 02 00 01 4c 00 00 00 c8 00 21 e8'))); // ch 1 → 29.9 % over 2 s
     expect(lights).toEqual([['dynalite-home-a9-c1', { on: true, level: 29.9 }]]);
-    await vi.advanceTimersByTimeAsync(1999);
+    await vi.advanceTimersByTimeAsync(10_000);
     expect(api.getLevel).not.toHaveBeenCalled();
-    await vi.advanceTimersByTimeAsync(200);
-    expect(api.getLevel).toHaveBeenCalledWith(9, 1);
+  });
+
+  it('takes from an answer given mid-fade where the channel is going', () => {
+    const { bridge, lights } = setup();
+    // Seen on 12D, asked 50 ms into a fade from 4.7 % to 9.8 %: now 0C at 14, going to 19 at 15.
+    bridge.handleEvent(decode(dynet2Packet([0xac, 0x04, 0x23, 0xc3, 0x00, 0x46, 0x00, 0x09, 0xff, 0x00, 0x00, 0x01, 0x00, 0x00, 0x0c, 0x19, 0x00, 0x00])));
+    expect(lights).toEqual([['dynalite-home-a9-c1', { on: true, level: 9.8 }]]);
   });
 
   it('takes an answer as it is, without asking again', async () => {

@@ -281,7 +281,8 @@ function decodeDynet2(packet: Uint8Array): DynetEvent {
   if (cmd === 0x22 && len >= 16) return { kind: 'request', area, asks: 'level', channel, packet };
   if (cmd === 0x23 && len >= 20 && r[9] === 2) return { kind: 'preset', area, preset: r[15], reported: true, packet };
   if (cmd === 0x23 && len >= 20 && r[9] === 0) {
-    return { kind: 'channel', area, channel, level: dynet2Percent(r[14]), current: dynet2Percent(r[15]), reported: true, packet };
+    // Byte 14 is where the channel is, 15 where it is going (DyNet 1's 0x60 has them the other way round).
+    return { kind: 'channel', area, channel, level: dynet2Percent(r[15]), current: dynet2Percent(r[14]), reported: true, packet };
   }
   return { kind: 'unknown', packet };
 }
