@@ -51,7 +51,7 @@ describe('the gateway over HTTP', () => {
     });
     const gw = new GatewayHttp({ host });
     expect(await gw.getPreset(9)).toBe(5);
-    expect(await gw.getLevel(9, 1)).toBe(29.9);
+    expect(await gw.getLevel(9, 1)).toBe(30);
     expect(await gw.getTemperature(18)).toBe(23.39);
     expect(await gw.getSetpoint(18)).toBe(21.5);
     expect(seen.every((u) => u.pathname === '/GetDyNet.cgi')).toBe(true);

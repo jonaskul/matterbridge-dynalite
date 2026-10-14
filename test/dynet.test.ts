@@ -26,12 +26,12 @@ const SEEN: Array<[string, string]> = [
   ['ac 03 56 c3 00 46 00 11 ff 0d 15 32 00 00 0a 72', 'area 17: set to 21.50 °C'], // setpoint changed at the thermostat
   ['ac 03 56 c3 00 46 00 11 ff 0d 16 32 00 00 0e 73', 'area 17: set to 22.50 °C'],
   ['ac 04 88 c3 00 46 aa 55 55 00 02 12 25 23 ff ff ff 00 da ee', 'time set to 12:25:23'],
-  ['ac 04 10 c3 00 46 00 09 ff 02 00 01 4c 00 00 00 c8 00 21 e8', 'area 9 ch 1: → 29.9 % over 2 s'], // set to 30 %
-  ['ac 04 10 c3 00 46 00 09 ff 02 00 01 be 00 00 00 c8 00 cd 5a', 'area 9 ch 1: → 74.8 % over 2 s'], // set to 75 %
+  ['ac 04 10 c3 00 46 00 09 ff 02 00 01 4c 00 00 00 c8 00 21 e8', 'area 9 ch 1: → 30 % over 2 s'], // set to 30 %
+  ['ac 04 10 c3 00 46 00 09 ff 02 00 01 be 00 00 00 c8 00 cd 5a', 'area 9 ch 1: → 75 % over 2 s'], // set to 75 %
   ['ac 02 20 c3 00 46 00 09 ff 00 96 df', 'area 9: preset asked'],
   ['ac 04 23 c3 00 46 00 09 ff 02 00 01 00 00 00 01 00 00 fc e8', 'area 9: is at preset 1'],
   ['ac 03 22 c3 00 46 00 09 ff 00 00 01 00 00 3a e3', 'area 9 ch 1: level asked'],
-  ['ac 04 23 c3 00 46 00 09 ff 00 00 01 00 00 4c 4c 00 00 fb 7d', 'area 9 ch 1: at 29.9 % (going to 29.9 %)'],
+  ['ac 04 23 c3 00 46 00 09 ff 00 00 01 00 00 4c 4c 00 00 fb 7d', 'area 9 ch 1: at 30 % (going to 30 %)'],
 ];
 
 group('DyNet2 as read off a gateway', () => {
@@ -56,7 +56,7 @@ group('DyNet2 as read off a gateway', () => {
     expect(decode(bytes(SEEN[6][0]))).toMatchObject({ kind: 'setpoint', area: 17, setpoint: 21.5 });
     expect(decode(bytes(SEEN[9][0]))).toMatchObject({ kind: 'channel', area: 9, channel: 1 });
     expect(decode(bytes(SEEN[9][0]))).not.toHaveProperty('reported');
-    expect(decode(bytes(SEEN[14][0]))).toMatchObject({ kind: 'channel', reported: true, current: 29.9 });
+    expect(decode(bytes(SEEN[14][0]))).toMatchObject({ kind: 'channel', reported: true, current: 30 });
   });
 
   it('takes a thermostat value by byte 9, not by the command', () => {

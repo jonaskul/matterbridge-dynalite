@@ -70,7 +70,8 @@ export class GatewayHttp {
 
   /** A channel's level, in percent. */
   async getLevel(area: number, channel: number): Promise<number | undefined> {
-    return number((await this.read({ a: area, c: channel, j: 255 })).l);
+    const level = number((await this.read({ a: area, c: channel, j: 255 })).l);
+    return level === undefined ? undefined : Math.round(level); // whole percent, as from the bus
   }
 
   /** A thermostat's temperature, °C. */

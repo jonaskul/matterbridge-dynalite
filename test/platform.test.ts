@@ -104,8 +104,9 @@ describe('the platform', () => {
   it('shows a channel as a dimmable light and an area as a thermostat, read from the gateway', async () => {
     const light = endpoint('dynalite-home-a9-c1');
     const room = endpoint('dynalite-home-a18');
-    await until(() => light.getAttribute('onOff', 'onOff') === true);
-    expect(light.getAttribute('levelControl', 'currentLevel')).toBe(percentToLevel(40));
+    // On/off is set before the level: wait for the level, not for the light to be on.
+    await until(() => light.getAttribute('levelControl', 'currentLevel') === percentToLevel(40));
+    expect(light.getAttribute('onOff', 'onOff')).toBe(true);
     await until(() => room.getAttribute('thermostat', 'localTemperature') === 2100);
     expect(room.getAttribute('thermostat', 'occupiedHeatingSetpoint')).toBe(2000);
   });
@@ -116,16 +117,16 @@ describe('the platform', () => {
     const room = endpoint('dynalite-home-a18');
     await until(() => room.getAttribute('thermostat', 'localTemperature') === 2339);
 
-    busSocket!.write(bytes('ac 04 10 c3 00 46 00 09 ff 02 00 01 be 00 00 00 c8 00 cd 5a')); // area 9 ch 1 → 74.8 %
+    busSocket!.write(bytes('ac 04 10 c3 00 46 00 09 ff 02 00 01 be 00 00 00 c8 00 cd 5a')); // area 9 ch 1 → 75 %
     const light = endpoint('dynalite-home-a9-c1');
-    await until(() => light.getAttribute('levelControl', 'currentLevel') === percentToLevel(74.8));
+    await until(() => light.getAttribute('levelControl', 'currentLevel') === percentToLevel(75));
   });
 
   it('sends a command from Matter to the gateway', async () => {
     const light = endpoint('dynalite-home-a9-c1');
     await light.executeCommandHandler('moveToLevelWithOnOff', { level: 127, transitionTime: 10, optionsMask: {}, optionsOverride: {} } as never, 'levelControl' as never, {} as never, light as never);
     await light.executeCommandHandler('off', {} as never, 'onOff' as never, {} as never, light as never);
-    expect(commands).toEqual([`a=9&c=1&l=${Math.round(levelToPercent(127))}&f=1000&j=255`, 'a=9&c=1&l=0&f=2000&j=255']);
+    expect(commands).toEqual(['a=9&c=1&l=50&f=1000&j=255', 'a=9&c=1&l=0&f=2000&j=255']);
   });
 });
 
@@ -134,7 +135,7 @@ describe('levels', () => {
     expect(percentToLevel(100)).toBe(254);
     expect(percentToLevel(0)).toBe(1);
     expect(levelToPercent(254)).toBe(100);
-    expect(percentToLevel(levelToPercent(190))).toBe(190);
+    expect(levelToPercent(127)).toBe(50);
   });
 });
 

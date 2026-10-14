@@ -29,7 +29,7 @@ export function percentToLevel(percent: number): number {
 }
 
 export function levelToPercent(level: number): number {
-  return Math.round((level / 254) * 1000) / 10;
+  return Math.round((level / 254) * 100); // whole percent: finer than the eye, and what the gateway takes
 }
 
 /** A Matter transition time (tenths of a second, or null) as milliseconds; undefined to use the gateway's default fade. */

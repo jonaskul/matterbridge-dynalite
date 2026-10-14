@@ -96,8 +96,8 @@ describe('the bus', () => {
 
   it('shows a level at once, where it is going, without reading it back', async () => {
     const { bridge, api, lights } = setup();
-    bridge.handleEvent(decode(bytes('ac 04 10 c3 00 46 00 09 ff 02 00 01 4c 00 00 00 c8 00 21 e8'))); // ch 1 → 29.9 % over 2 s
-    expect(lights).toEqual([['dynalite-home-a9-c1', { on: true, level: 29.9 }]]);
+    bridge.handleEvent(decode(bytes('ac 04 10 c3 00 46 00 09 ff 02 00 01 4c 00 00 00 c8 00 21 e8'))); // ch 1 → 30 % over 2 s
+    expect(lights).toEqual([['dynalite-home-a9-c1', { on: true, level: 30 }]]);
     await vi.advanceTimersByTimeAsync(10_000);
     expect(api.getLevel).not.toHaveBeenCalled();
   });
@@ -106,15 +106,15 @@ describe('the bus', () => {
     const { bridge, lights } = setup();
     // Seen on 12D, asked 50 ms into a fade from 4.7 % to 9.8 %: now 0C at 14, going to 19 at 15.
     bridge.handleEvent(decode(dynet2Packet([0xac, 0x04, 0x23, 0xc3, 0x00, 0x46, 0x00, 0x09, 0xff, 0x00, 0x00, 0x01, 0x00, 0x00, 0x0c, 0x19, 0x00, 0x00])));
-    expect(lights).toEqual([['dynalite-home-a9-c1', { on: true, level: 9.8 }]]);
+    expect(lights).toEqual([['dynalite-home-a9-c1', { on: true, level: 10 }]]);
   });
 
   it('takes an answer as it is, without asking again', async () => {
     const { bridge, api, lights } = setup();
-    bridge.handleEvent(decode(bytes('ac 04 23 c3 00 46 00 09 ff 00 00 01 00 00 4c 4c 00 00 fb 7d'))); // ch 1 at 29.9 %
+    bridge.handleEvent(decode(bytes('ac 04 23 c3 00 46 00 09 ff 00 00 01 00 00 4c 4c 00 00 fb 7d'))); // ch 1 at 30 %
     bridge.handleEvent(decode(bytes('ac 04 23 c3 00 46 00 09 ff 02 00 01 00 00 00 01 00 00 fc e8'))); // is at preset 1
     await vi.advanceTimersByTimeAsync(10_000);
-    expect(lights).toEqual([['dynalite-home-a9-c1', { on: true, level: 29.9 }]]);
+    expect(lights).toEqual([['dynalite-home-a9-c1', { on: true, level: 30 }]]);
     expect(api.getLevel).not.toHaveBeenCalled();
   });
 

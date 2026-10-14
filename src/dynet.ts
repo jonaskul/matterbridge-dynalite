@@ -90,16 +90,12 @@ export function fletcher16(data: ArrayLike<number>, length = data.length): [numb
 /** A DyNet 1 level byte as a percentage: 0x01 is full, 0xFF off. */
 export function dynet1Percent(raw: number): number {
   const r = Math.min(Math.max(raw, 1), 255);
-  return round1(((255 - r) / 254) * 100);
+  return Math.round(((255 - r) / 254) * 100);
 }
 
 /** A DyNet2 level byte as a percentage: 0 off, 254 (or more) full. */
 export function dynet2Percent(raw: number): number {
-  return round1((Math.min(raw, 254) / 254) * 100);
-}
-
-function round1(n: number): number {
-  return Math.round(n * 10) / 10;
+  return Math.round((Math.min(raw, 254) / 254) * 100);
 }
 
 export function hex(data: ArrayLike<number>): string {
