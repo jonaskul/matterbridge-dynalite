@@ -1,6 +1,6 @@
 # matterbridge-dynalite
 
-A [Matterbridge](https://github.com/Luligu/matterbridge) plugin for **Philips Dynalite**. It puts your Dynalite lights and heating into Apple Home, Google Home, Alexa, SmartThings, Home Assistant or any other Matter controller. The plugin talks straight to the Dynalite Ethernet gateway, with nothing in between.
+A [Matterbridge](https://github.com/Luligu/matterbridge) plugin for **Signify Dynalite** (formerly Philips Dynalite). It puts your Dynalite lights and heating into Apple Home, Google Home, Alexa, SmartThings, Home Assistant or any other Matter controller. The plugin talks straight to the Dynalite Ethernet gateway, with nothing in between.
 
 - **Lights.** Each channel can be its own Matter light: dimmable, or on/off for a relay. An area can also be shown as one light that is switched by its presets.
 - **Heating.** A thermostat area becomes a Matter heating thermostat, with the room temperature and a setpoint you can change.
@@ -130,4 +130,4 @@ To try a local build in Matterbridge, run `matterbridge -add /path/to/matterbrid
 
 ## Licence
 
-Apache-2.0. Dynalite, DyNet and Philips are trademarks of their owners. This project is not affiliated with or endorsed by Signify.
+Apache-2.0. Dynalite, DyNet, Signify and Philips are trademarks of their respective owners. This project is not affiliated with or endorsed by Signify.

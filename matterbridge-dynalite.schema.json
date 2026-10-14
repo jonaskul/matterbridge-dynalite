@@ -1,6 +1,6 @@
 {
   "title": "Matterbridge Dynalite plugin",
-  "description": "matterbridge-dynalite: Philips Dynalite lights and heating, straight from the Ethernet gateway",
+  "description": "matterbridge-dynalite: Signify Dynalite lights and heating, straight from the Ethernet gateway",
   "type": "object",
   "properties": {
     "name": { "title": "Plugin Name", "type": "string", "readOnly": true, "ui:widget": "hidden" },

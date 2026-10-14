@@ -1,5 +1,5 @@
 /**
- * matterbridge-dynalite: Philips Dynalite lights and heating in Matter, straight
+ * matterbridge-dynalite: Signify Dynalite lights and heating in Matter, straight
  * from the Ethernet gateway.
  */
 

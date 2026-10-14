@@ -114,7 +114,7 @@ export class DynalitePlatform extends MatterbridgeDynamicPlatform {
       device.name,
       device.id,
       this.matterbridge.aggregatorVendorId,
-      'Philips Dynalite',
+      'Signify Dynalite',
       model,
     );
     const fail = (what: string) => (err: Error) => this.log.error(`${device.name}: ${what} failed: ${err.message}`);
