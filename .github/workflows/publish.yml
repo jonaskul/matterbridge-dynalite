@@ -50,12 +50,14 @@ jobs:
           npm install
           npm link matterbridge
 
-      - name: Typecheck and test
+      - name: Typecheck, build and test
         run: |
           npm run typecheck
+          npm run clean
+          npm run build
           npm test
 
-      # prepublishOnly builds dist afresh. A pre-release goes out under "next",
-      # so Matterbridge keeps installing the last full release.
+      # A pre-release goes out under "next", so Matterbridge keeps installing
+      # the last full release.
       - name: Stage on npm
         run: npm stage publish ${{ github.event.release.prerelease && '--tag next' || '' }}
