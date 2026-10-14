@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.1.0 — unreleased
+## 0.1.1 — 2026-10-15
+
+- The first release published from GitHub, through npm's trusted publishing; the code is as in 0.1.0.
+
+## 0.1.0 — 2026-10-14
 
 First version.
 

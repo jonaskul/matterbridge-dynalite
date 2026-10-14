@@ -23,9 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
@@ -40,6 +40,14 @@ jobs:
           version="$(node -p 'require("./package.json").version')"
           if [ "$tag" != "$version" ]; then
             echo "::error::Release tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+
+      - name: The version is not on npm yet
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if npm view "matterbridge-dynalite@$version" version >/dev/null 2>&1; then
+            echo "::error::matterbridge-dynalite $version is already on npm: raise the version in package.json first"
             exit 1
           fi
 
