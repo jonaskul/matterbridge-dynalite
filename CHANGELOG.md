@@ -3,6 +3,7 @@
 ## 0.1.1 — 2026-10-15
 
 - The first release published from GitHub, through npm's trusted publishing; the code is as in 0.1.0.
+- Described as "Matterbridge Signify Dynalite plugin", like the other plugins in Matterbridge's list (it is also the log prefix).
 
 ## 0.1.0 — 2026-10-14
 
