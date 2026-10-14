@@ -62,6 +62,8 @@ export type DynetEvent =
   | { kind: 'setpoint'; area: number; setpoint: number; packet: Uint8Array }
   /** The time set on the devices, hh:mm:ss. */
   | { kind: 'time'; clock: string; packet: Uint8Array }
+  /** Between devices, about themselves: "who are you?" to all, a device saying it has started. */
+  | { kind: 'device'; text: string; packet: Uint8Array }
   /** A packet whose checksum holds but whose meaning is not known. */
   | { kind: 'unknown'; area?: number; packet: Uint8Array }
   /** Bytes that made no packet. */
@@ -266,6 +268,13 @@ function decodeDynet2(packet: Uint8Array): DynetEvent {
     if (r[9] === 0x0c) return { kind: 'request', area, asks: 'temperature', packet };
     if (r[9] === 0x0d) return { kind: 'request', area, asks: 'setpoint', packet };
   }
+  if (cmd === 0x82) return { kind: 'device', text: '"who are you?" to all devices', packet };
+  if (cmd === 0x81 && len >= 39) {
+    // Box at 5, firmware at 12–13, then the IPv4 address at 19–22 and the IPv6 one at 23–38.
+    const h2 = (b: number) => b.toString(16).padStart(2, '0');
+    const ip = Array.from(r.subarray(19, 23)).join('.');
+    return { kind: 'device', text: `device 0x${h2(r[3])} box ${r[5]} started: firmware v${h2(r[12])}.${h2(r[13])}, ${ip}`, packet };
+  }
   if (cmd === 0x88 && len >= 16) {
     const two = (b: number) => b.toString(16).padStart(2, '0');
     return { kind: 'time', clock: `${two(r[11])}:${two(r[12])}:${two(r[13])}`, packet };
@@ -287,6 +296,7 @@ function decodeDynet2(packet: Uint8Array): DynetEvent {
 export function describe(event: DynetEvent): string {
   if (event.kind === 'skipped') return `${event.raw.length} byte(s) not DyNet [${hex(event.raw)}]`;
   if (event.kind === 'time') return `time set to ${event.clock}`;
+  if (event.kind === 'device') return event.text;
   if (event.kind === 'unknown') {
     const where = event.area !== undefined ? `area ${event.area}: ` : '';
     return `${where}not decoded [${hex(event.packet)}]`;
@@ -314,7 +324,7 @@ export function describe(event: DynetEvent): string {
   }
 }
 
-/** The DyNet2 packet a gateway sends about every three seconds (cmd 0x82): not understood, and too frequent to log. */
+/** The "who are you?" a gateway asks of all devices about every three seconds (DyNet2 0x82): too frequent to log. */
 export function isHeartbeat(event: DynetEvent): boolean {
-  return event.kind === 'unknown' && event.packet[0] === 0xac && event.packet[2] === 0x82;
+  return event.kind === 'device' && event.packet[0] === 0xac && event.packet[2] === 0x82;
 }

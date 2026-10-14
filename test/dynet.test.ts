@@ -72,9 +72,15 @@ group('DyNet2 as read off a gateway', () => {
     expect(decode(bytes('ac 03 55 c3 00 46 00 0e ff 0d 00 00 00 00 ff 27'))).toMatchObject({ kind: 'request', area: 14, asks: 'setpoint' });
   });
 
-  it('leaves the gateway heartbeat raw', () => {
+  it('reads a device saying it has started', () => {
+    // Captured on 12D after the gateway was reset; Dynalite's monitor: "Reply Device reset (F/W Version v01.46, IPv4 Address: 10.10.2.100 …)".
+    const hello = bytes('ac 0a 81 c3 00 46 aa 55 55 00 00 00 01 46 ef ef 01 00 03 0a 0a 02 64 fe 80 00 00 00 00 00 00 02 01 c0 ff fe 30 19 02 00 00 00 6a c0');
+    expect(describe(decode(hello))).toBe('device 0xc3 box 70 started: firmware v01.46, 10.10.2.100');
+  });
+
+  it('reads the gateway asking every device who it is', () => {
     const beat = decode(bytes('ac 04 82 c3 00 46 aa 55 55 00 0c 00 00 00 00 00 00 00 c8 9b'));
-    expect(beat.kind).toBe('unknown');
+    expect(describe(beat)).toBe('"who are you?" to all devices');
     expect(isHeartbeat(beat)).toBe(true);
     expect(isHeartbeat(decode(dynet1Packet(5, 0x00)))).toBe(false);
   });

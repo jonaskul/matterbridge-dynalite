@@ -63,10 +63,14 @@ These were seen when 30 % and 75 % were set on a channel: the levels went over a
 
 In a `23` answer, byte 14 is the level now and 15 the level it is fading to: asked 50 ms into a 2 s fade from 4.7 % to 9.8 %, the answer had `0C` (4.7 %) at 14 and `19` (9.8 %) at 15. That is the other way round from DyNet 1's `60`.
 
-### Seen, not understood
+### Between devices
 
-| Cmd | Seen as |
-|---|---|
-| `82` | `AC 04 82 C3 00 46 AA 55 55 00 0C 00 …`, about every three seconds: likely a heartbeat from the gateway |
+Named by Dynalite's monitor.
+
+| Cmd | Meaning | Layout |
+|---|---|---|
+| `82` | *Request Who are you*, to all devices: a gateway sends it about every three seconds | `AC 04 82 C3 00 46 AA 55 55 00 0C 00 …` |
+| `81` | *Reply Device reset*: a device has started | device type at 3, box at 5; firmware at 12–13 (`01 46` = v01.46); a gateway adds its IPv4 address at 19–22 and IPv6 at 23–38 |
+| `02` | *Reset the device*, sent to one | |
 
 Not yet seen: a temperature below 0 °C. If you capture one, or any other packet not listed here, please open an issue with the bytes and what was done at the time.
