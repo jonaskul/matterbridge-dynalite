@@ -135,6 +135,13 @@ The tests cover the DyNet decoding (with packets captured from real gateways), t
 
 To try a local build in Matterbridge, run `matterbridge -add /path/to/matterbridge-dynalite` and restart it.
 
+### Releasing
+
+1. Set the new version in `package.json` (and in `CHANGELOG.md`), and push it.
+2. Make a GitHub release with the tag `v<version>`, e.g. `v0.1.0`.
+
+The *Publish* workflow then tests it and publishes it to npm with provenance, through npm's trusted publishing (no token in the repository). A release marked as a pre-release goes out under the `next` tag, so Matterbridge keeps offering the last full release.
+
 ## Licence
 
 Apache-2.0. Dynalite, DyNet, Signify and Philips are trademarks of their respective owners. This project is not affiliated with or endorsed by Signify.

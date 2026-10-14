@@ -1,0 +1,60 @@
+name: Publish
+
+# A GitHub release publishes that version to npm, where Matterbridge's
+# "Install plugin" finds it. npm trusts this workflow by OIDC (trusted
+# publishing): no token is kept in the repository.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write # for npm's trusted publishing and provenance
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm 11.5.1 or later.
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: The release tag is the package's version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(node -p 'require("./package.json").version')"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::Release tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+
+      # Matterbridge is linked, never a dependency: as on a Matterbridge host.
+      - name: Install
+        run: |
+          npm install -g matterbridge
+          npm install
+          npm link matterbridge
+
+      - name: Typecheck and test
+        run: |
+          npm run typecheck
+          npm test
+
+      # prepublishOnly builds dist afresh. A pre-release goes out under "next",
+      # so Matterbridge keeps installing the last full release.
+      - name: Publish
+        run: npm publish --access public ${{ github.event.release.prerelease && '--tag next' || '' }}
