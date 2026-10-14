@@ -106,6 +106,12 @@ Matterbridge's usual `whiteList`, `blackList`, `debug` and `unregisterOnShutdown
 
 They are in your Dynalite configuration (System Builder or EnvisionProject). You can also watch the bus: with a DyNet port set and `debug` on, the plugin logs what it receives. Press a panel and look for `area N ch M`.
 
+Or watch the port from a shell on the Matterbridge host, without Matterbridge (also a quick check that the port is set up right):
+
+```bash
+node /path/to/matterbridge-dynalite/dist/listen.js 192.168.1.50 50000   # add --all for heartbeats and bytes
+```
+
 ## Notes and limits
 
 - **Setpoints and temperatures** are taken from what the thermostats send. Only temperatures above 0 °C have been seen so far, so how a negative temperature is sent is not known yet.
