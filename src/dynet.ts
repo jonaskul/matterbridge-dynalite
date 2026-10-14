@@ -57,7 +57,7 @@ export type DynetEvent =
   /** A fade was stopped. Area-wide unless `channel`. */
   | { kind: 'stop'; area: number; channel?: number; packet: Uint8Array }
   /** Someone asked something. */
-  | { kind: 'request'; area: number; asks: 'preset' | 'level' | 'temperature'; channel?: number; packet: Uint8Array }
+  | { kind: 'request'; area: number; asks: 'preset' | 'level' | 'temperature' | 'setpoint'; channel?: number; packet: Uint8Array }
   | { kind: 'temperature'; area: number; temperature: number; packet: Uint8Array }
   | { kind: 'setpoint'; area: number; setpoint: number; packet: Uint8Array }
   /** The time set on the devices, hh:mm:ss. */
@@ -264,6 +264,11 @@ function decodeDynet2(packet: Uint8Array): DynetEvent {
     const value = r[10] + r[11] / 100;
     if (r[9] === 0x0c) return { kind: 'temperature', area, temperature: value, packet };
     if (r[9] === 0x0d) return { kind: 'setpoint', area, setpoint: value, packet };
+  }
+  if (cmd === 0x55 && len >= 16) {
+    // The question a 0x57 answers; byte 9 names the value, as there.
+    if (r[9] === 0x0c) return { kind: 'request', area, asks: 'temperature', packet };
+    if (r[9] === 0x0d) return { kind: 'request', area, asks: 'setpoint', packet };
   }
   if (cmd === 0x88 && len >= 16) {
     const two = (b: number) => b.toString(16).padStart(2, '0');

@@ -56,6 +56,7 @@ Byte 9, not the command, decides whether a value is a temperature or a setpoint.
 | `10` | Channel set to a level | channel at 10–11; level at 12 (0–254, 254 = 100 %); fade at 14–16, hundredths |
 | `20` | "Which preset is the area at?" | |
 | `22` | "Which level is the channel at?" | channel at 10–11 |
+| `55` | "What is the thermostat's value?" — answered by `57` | byte 9 as in `57`: `0C` temperature, `0D` setpoint |
 | `23` | Answer to `20`/`22` | byte 9: `02` preset (value at 15), `00` channel (channel at 10–11, target level at 14, current at 15) |
 
 These were seen when 30 % and 75 % were set on a channel: the levels went over as `4C` (76) and `BE` (190). The gateway's own read-back followed.

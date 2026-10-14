@@ -66,6 +66,12 @@ group('DyNet2 as read off a gateway', () => {
     expect(decode(dynet2Packet([...head, 0x0e, 12, 0, 0, 0])).kind).toBe('unknown');
   });
 
+  it('reads the question a thermostat reply answers', () => {
+    // Captured on 12D: the gateway asking area 14 for its temperature, then its setpoint.
+    expect(decode(bytes('ac 03 55 c3 00 46 00 0e ff 0c 00 00 00 00 fa 26'))).toMatchObject({ kind: 'request', area: 14, asks: 'temperature' });
+    expect(decode(bytes('ac 03 55 c3 00 46 00 0e ff 0d 00 00 00 00 ff 27'))).toMatchObject({ kind: 'request', area: 14, asks: 'setpoint' });
+  });
+
   it('leaves the gateway heartbeat raw', () => {
     const beat = decode(bytes('ac 04 82 c3 00 46 aa 55 55 00 0c 00 00 00 00 00 00 00 c8 9b'));
     expect(beat.kind).toBe('unknown');
