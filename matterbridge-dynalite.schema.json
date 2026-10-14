@@ -1,0 +1,126 @@
+{
+  "title": "Matterbridge Dynalite plugin",
+  "description": "matterbridge-dynalite: Philips Dynalite lights and heating, straight from the Ethernet gateway",
+  "type": "object",
+  "properties": {
+    "name": { "title": "Plugin Name", "type": "string", "readOnly": true, "ui:widget": "hidden" },
+    "type": { "title": "Plugin Type", "type": "string", "readOnly": true, "ui:widget": "hidden" },
+    "version": { "title": "Plugin Version", "type": "string", "readOnly": true, "ui:widget": "hidden" },
+    "gateways": {
+      "title": "Gateways",
+      "description": "One entry per Dynalite Ethernet gateway (PDEG, DDNG and similar).",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "host"],
+        "properties": {
+          "name": {
+            "title": "Name",
+            "description": "A short name, unique among the gateways. It is part of every device's identity: changing it later makes the devices new to your controller.",
+            "type": "string"
+          },
+          "host": {
+            "title": "Address",
+            "description": "The gateway's IP address or host name, with :port if its web server is not on 80 (443 with HTTPS).",
+            "type": "string"
+          },
+          "https": { "title": "Use HTTPS", "type": "boolean", "default": false },
+          "allowSelfSigned": {
+            "title": "Accept a self-signed certificate",
+            "description": "With HTTPS: accept the gateway's own certificate.",
+            "type": "boolean",
+            "default": false
+          },
+          "username": { "title": "Username", "description": "Only if the gateway asks for HTTP authentication.", "type": "string" },
+          "password": { "title": "Password", "type": "string", "ui:widget": "password" },
+          "dynetPort": {
+            "title": "DyNet TCP port (live updates)",
+            "description": "A TCP server port set up on the gateway (connection Trunk, DyNet 1 or DyNet2), e.g. 50000. Changes made anywhere — wall panels, timers, other apps — then show at once. Leave empty to rely on polling. If another program already uses that port, give this plugin a port of its own.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "pollMinutes": {
+            "title": "Read every area every … minutes",
+            "description": "A check when live updates are on (60 by default); the only source of state without them (5 by default).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1440
+          },
+          "fadeSeconds": {
+            "title": "Fade (seconds)",
+            "description": "The fade for commands from Matter that do not give one.",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 600,
+            "default": 2
+          },
+          "areas": {
+            "title": "Areas",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["area", "name", "type"],
+              "properties": {
+                "area": { "title": "Area number", "type": "integer", "minimum": 1, "maximum": 65535 },
+                "name": { "title": "Name", "type": "string" },
+                "type": { "title": "Type", "type": "string", "enum": ["light", "thermostat"], "default": "light" },
+                "channels": {
+                  "title": "Channels (lights)",
+                  "description": "Each channel becomes its own light. Leave empty to show the area as one light switched by its presets.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["channel"],
+                    "properties": {
+                      "channel": { "title": "Channel", "type": "integer", "minimum": 1, "maximum": 255 },
+                      "name": { "title": "Name", "description": "The area's name and the channel number if left empty.", "type": "string" },
+                      "dimmable": { "title": "Dimmable", "description": "Off for a relay that only switches.", "type": "boolean", "default": true }
+                    }
+                  }
+                },
+                "onPreset": {
+                  "title": "On preset (area without channels)",
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 1
+                },
+                "offPreset": {
+                  "title": "Off preset (area without channels)",
+                  "type": "integer",
+                  "minimum": 1,
+                  "default": 4
+                },
+                "minSetpoint": { "title": "Lowest setpoint, °C (thermostats)", "type": "number", "default": 5 },
+                "maxSetpoint": { "title": "Highest setpoint, °C (thermostats)", "type": "number", "default": 30 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "whiteList": {
+      "title": "White list",
+      "description": "Only expose these devices (by name or id). Leave empty for all.",
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "selectFrom": "name"
+    },
+    "blackList": {
+      "title": "Black list",
+      "description": "Do not expose these devices (by name or id).",
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "selectFrom": "name"
+    },
+    "debug": { "title": "Debug", "description": "Log more.", "type": "boolean", "default": false },
+    "unregisterOnShutdown": {
+      "title": "Unregister on shutdown",
+      "description": "Remove all devices from the bridge when the plugin stops (for development).",
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

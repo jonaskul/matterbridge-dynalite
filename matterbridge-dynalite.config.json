@@ -1,0 +1,10 @@
+{
+  "name": "matterbridge-dynalite",
+  "type": "DynamicPlatform",
+  "version": "0.1.0",
+  "gateways": [],
+  "whiteList": [],
+  "blackList": [],
+  "debug": false,
+  "unregisterOnShutdown": false
+}
