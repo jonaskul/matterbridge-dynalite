@@ -1,8 +1,9 @@
 name: Publish
 
-# A GitHub release publishes that version to npm, where Matterbridge's
-# "Install plugin" finds it. npm trusts this workflow by OIDC (trusted
-# publishing): no token is kept in the repository.
+# A GitHub release stages that version on npm (trusted publishing by OIDC:
+# no token is kept in the repository). It goes live, and Matterbridge's
+# "Install plugin" finds it, once a maintainer approves it with 2FA on
+# npmjs.com (Staged Packages) or with `npm stage approve <id>`.
 
 on:
   release:
@@ -29,7 +30,7 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      # Trusted publishing needs npm 11.5.1 or later.
+      # Staged publishing needs npm 11.15.0 or later.
       - name: Update npm
         run: npm install -g npm@latest
 
@@ -56,5 +57,5 @@ jobs:
 
       # prepublishOnly builds dist afresh. A pre-release goes out under "next",
       # so Matterbridge keeps installing the last full release.
-      - name: Publish
-        run: npm publish --access public ${{ github.event.release.prerelease && '--tag next' || '' }}
+      - name: Stage on npm
+        run: npm stage publish ${{ github.event.release.prerelease && '--tag next' || '' }}

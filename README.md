@@ -140,7 +140,9 @@ To try a local build in Matterbridge, run `matterbridge -add /path/to/matterbrid
 1. Set the new version in `package.json` (and in `CHANGELOG.md`), and push it.
 2. Make a GitHub release with the tag `v<version>`, e.g. `v0.1.0`.
 
-The *Publish* workflow then tests it and publishes it to npm with provenance, through npm's trusted publishing (no token in the repository). A release marked as a pre-release goes out under the `next` tag, so Matterbridge keeps offering the last full release.
+3. Approve it on npmjs.com (*Staged Packages*, with 2FA) or with `npm stage approve <id>`.
+
+The *Publish* workflow tests it and stages it on npm through trusted publishing (no token in the repository); nothing goes live until a maintainer approves it. A release marked as a pre-release goes out under the `next` tag, so Matterbridge keeps offering the last full release.
 
 ## Licence
 
