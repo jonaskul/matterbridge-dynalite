@@ -320,7 +320,8 @@ export function describe(event: DynetEvent): string {
     case 'temperature':
       return `${where}: ${event.temperature.toFixed(2)} °C`;
     case 'setpoint':
-      return `${where}: set to ${event.setpoint.toFixed(2)} °C`;
+      // 0x56 as it is changed at the thermostat; 0x57 as it is told.
+      return `${where}: setpoint${event.packet[2] === 0x56 ? ' changed to' : ''} ${event.setpoint.toFixed(2)} °C`;
   }
 }
 

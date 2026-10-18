@@ -23,8 +23,8 @@ const SEEN: Array<[string, string]> = [
   ['ac 03 57 c3 00 46 00 12 ff 0c 17 27 00 00 ff 6a', 'area 18: 23.39 °C'], // Reply with Actual temperature
   ['ac 03 57 c3 00 46 00 11 ff 0c 17 57 00 00 88 99', 'area 17: 23.87 °C'],
   ['ac 03 57 c3 00 46 00 13 ff 0c 14 18 00 00 cd 59', 'area 19: 20.24 °C'],
-  ['ac 03 56 c3 00 46 00 11 ff 0d 15 32 00 00 0a 72', 'area 17: set to 21.50 °C'], // setpoint changed at the thermostat
-  ['ac 03 56 c3 00 46 00 11 ff 0d 16 32 00 00 0e 73', 'area 17: set to 22.50 °C'],
+  ['ac 03 56 c3 00 46 00 11 ff 0d 15 32 00 00 0a 72', 'area 17: setpoint changed to 21.50 °C'], // setpoint changed at the thermostat
+  ['ac 03 56 c3 00 46 00 11 ff 0d 16 32 00 00 0e 73', 'area 17: setpoint changed to 22.50 °C'],
   ['ac 04 88 c3 00 46 aa 55 55 00 02 12 25 23 ff ff ff 00 da ee', 'time set to 12:25:23'],
   ['ac 04 10 c3 00 46 00 09 ff 02 00 01 4c 00 00 00 c8 00 21 e8', 'area 9 ch 1: → 30 % over 2 s'], // set to 30 %
   ['ac 04 10 c3 00 46 00 09 ff 02 00 01 be 00 00 00 c8 00 cd 5a', 'area 9 ch 1: → 75 % over 2 s'], // set to 75 %
@@ -63,6 +63,7 @@ group('DyNet2 as read off a gateway', () => {
     // A reply (0x57) carrying the setpoint (0x0D) is the setpoint, not the room's temperature.
     const head = [0xac, 0x03, 0x57, 0xc3, 0x00, 0x46, 0x00, 0x05, 0xff];
     expect(decode(dynet2Packet([...head, 0x0d, 12, 0, 0, 0]))).toMatchObject({ kind: 'setpoint', area: 5, setpoint: 12 });
+    expect(describe(decode(dynet2Packet([...head, 0x0d, 12, 0, 0, 0])))).toBe('area 5: setpoint 12.00 °C'); // told, not changed
     expect(decode(dynet2Packet([...head, 0x0e, 12, 0, 0, 0])).kind).toBe('unknown');
   });
 
