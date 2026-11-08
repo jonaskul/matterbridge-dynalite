@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 — unreleased
+## 0.2.0 — 2026-11-08
 
 - A settings page of the plugin's own, opened with the globe button by the plugin in Matterbridge's list (in a large dialog, full screen on a phone, or a tab of its own):
   - gateways, areas and channels laid out compactly, each area on one row, with only the fields its type uses;
