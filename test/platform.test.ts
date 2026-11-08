@@ -18,7 +18,7 @@ import {
   log,
   setupTest,
 } from 'matterbridge/test-utils/vitest';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import initializePlugin from '../src/module.js';
 import { type DynalitePlatform, levelToPercent, percentToLevel, uniqueName } from '../src/platform.js';
@@ -127,6 +127,36 @@ describe('the platform', () => {
     await light.executeCommandHandler('moveToLevelWithOnOff', { level: 127, transitionTime: 10, optionsMask: {}, optionsOverride: {} } as never, 'levelControl' as never, {} as never, light as never);
     await light.executeCommandHandler('off', {} as never, 'onOff' as never, {} as never, light as never);
     expect(commands).toEqual(['a=9&c=1&l=50&f=1000&j=255', 'a=9&c=1&l=0&f=2000&j=255']);
+  });
+});
+
+describe("the plugin's own page", () => {
+  it('reads the gateways, and what the bus has told of', async () => {
+    const config = (await platform.onFetch('GET', 'config')) as { gateways: Array<{ name: string }>; problems: string[] };
+    expect(config.gateways.map((g) => g.name)).toEqual(['Home']);
+    expect(config.problems).toEqual([]);
+    const seen = (await platform.onFetch('GET', 'seen')) as Array<{ gateway: string; live: string; areas: Array<{ area: number }> }>;
+    expect(seen[0]).toMatchObject({ gateway: 'Home', live: 'connected' });
+    expect(seen[0].areas.map((a) => a.area)).toEqual(expect.arrayContaining([9, 18]));
+  });
+
+  it('saves new gateways, to apply at the next start', async () => {
+    // Matterbridge writes the file and tells the frontend a restart is due: here, only that it is asked to.
+    const save = vi.spyOn(platform, 'saveConfig').mockImplementation(() => undefined);
+    const restart = vi.spyOn(platform, 'wssSendRestartRequired').mockImplementation(() => undefined);
+    const gateways = [{ name: 'Home', host: '10.0.0.5', areas: [{ area: 3, name: 'Kontor', type: 'light' }] }];
+    const r = (await platform.onFetch('PUT', 'config', undefined, { gateways })) as { saved: boolean; problems: string[] };
+    expect(r).toEqual({ saved: true, problems: [] });
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ name: 'matterbridge-dynalite', gateways }));
+    expect(restart).toHaveBeenCalled();
+    expect((await platform.onFetch('PUT', 'config', undefined, {})) as object).toEqual({ saved: false, problems: ['No gateways sent.'] });
+    save.mockRestore();
+    restart.mockRestore();
+  });
+
+  it('knows nothing else', async () => {
+    expect(await platform.onFetch('GET', 'nothing')).toBeUndefined();
+    expect(await platform.onFetch('POST', 'test', undefined, {})).toEqual({ http: { ok: false, message: 'No address.' } });
   });
 });
 

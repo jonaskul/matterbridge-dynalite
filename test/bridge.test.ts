@@ -179,3 +179,18 @@ function checksumOf(body: string): string {
   }
   return [s2, s1].map((n) => n.toString(16).padStart(2, '0')).join(' ');
 }
+
+describe('what the bus has said', () => {
+  it('is kept per area, set up here or not, to offer what to add', () => {
+    const { bridge } = setup();
+    bridge.handleEvent(decode(bytes('ac 04 10 c3 00 46 00 15 ff 02 00 03 be 00 00 00 c8 00 5f 68'))); // area 21 ch 3
+    bridge.handleEvent(decode(bytes('ac 03 57 c3 00 46 00 12 ff 0c 17 27 00 00 ff 6a'))); // area 18: 23.39 °C
+    bridge.handleEvent(decode(bytes('ac 03 01 c3 00 46 00 18 ff 00 05 00 00 c8 f0 9d'))); // area 24: preset 5
+    const seen = bridge.seenAreas();
+    expect(seen.map((s) => s.area)).toEqual([18, 21, 24]);
+    expect(seen[0]).toMatchObject({ area: 18, thermostat: true, temperature: 23.39, configured: 'thermostat' });
+    expect(seen[1]).toMatchObject({ area: 21, channels: [3], thermostat: false });
+    expect(seen[1]).not.toHaveProperty('configured');
+    expect(seen[2]).toMatchObject({ area: 24, presets: [5], configured: 'light' });
+  });
+});

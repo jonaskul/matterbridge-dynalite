@@ -21,6 +21,7 @@ import type { AnsiLogger } from 'matterbridge/logger';
 
 import { type Device, GatewayBridge } from './bridge.js';
 import { readConfig } from './config.js';
+import { probe, type ProbeSettings } from './probe.js';
 import { GatewayHttp } from './gateway.js';
 
 /** Matter levels run 1–254; DynaDash and the gateway speak percent. */
@@ -112,6 +113,43 @@ export class DynalitePlatform extends MatterbridgeDynamicPlatform {
     for (const bridge of this.bridges) {
       bridge.start().catch((err: Error) => this.log.error(`${bridge.gateway.name}: ${err.message}`));
     }
+  }
+
+  // -- the plugin's own page (apps/frontend) -----------------------------------
+
+  /**
+   * The settings page's API, at /plugins/matterbridge-dynalite/api/<path>:
+   *   GET config   the gateways as set, and what is wrong with them
+   *   PUT config   save new gateways ({ gateways }); a restart applies them
+   *   GET seen     per gateway, every area the bus has told of since start
+   *   POST test    try a gateway's address and DyNet port before saving
+   */
+  override async onFetch(method: string, path?: string, _query?: Record<string, unknown>, body?: unknown): Promise<unknown> {
+    if (path === 'config' && method === 'GET') {
+      return { gateways: this.config.gateways ?? [], problems: readConfig(this.config).problems };
+    }
+    if (path === 'config' && method === 'PUT') {
+      const gateways = (body as { gateways?: unknown })?.gateways;
+      if (!Array.isArray(gateways)) return { saved: false, problems: ['No gateways sent.'] };
+      const next = { ...this.config, gateways: gateways as PlatformConfig[string] };
+      this.saveConfig(next as PlatformConfig);
+      if (typeof this.wssSendRestartRequired === 'function') this.wssSendRestartRequired();
+      this.log.info(`Settings saved from the plugin's page (${gateways.length} gateway(s)); restart to apply them`);
+      return { saved: true, problems: readConfig(next).problems };
+    }
+    if (path === 'seen' && method === 'GET') {
+      return this.bridges.map((b) => ({
+        gateway: b.gateway.name,
+        live: b.gateway.dynetPort ? (b.liveConnected ? 'connected' : 'not connected') : 'off',
+        areas: b.seenAreas(),
+      }));
+    }
+    if (path === 'test' && method === 'POST') {
+      const s = body as ProbeSettings | undefined;
+      if (!s?.host) return { http: { ok: false, message: 'No address.' } };
+      return probe(s);
+    }
+    return undefined;
   }
 
   override async onShutdown(reason?: string): Promise<void> {

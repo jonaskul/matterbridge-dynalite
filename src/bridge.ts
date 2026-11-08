@@ -33,6 +33,25 @@ export interface Logger {
 
 export type DeviceKind = 'dimmable' | 'onoff' | 'thermostat';
 
+/** What the bus has said about one area since the plugin started: to find areas and channels to add. */
+export interface SeenArea {
+  area: number;
+  /** Channels a level was set or told for. */
+  channels: number[];
+  /** Presets chosen or told. */
+  presets: number[];
+  /** A temperature or setpoint was told: a thermostat. */
+  thermostat: boolean;
+  /** The last temperature told, °C. */
+  temperature?: number;
+  /** Set up in this plugin already (as what). */
+  configured?: 'light' | 'thermostat';
+  /** When last heard (ISO). */
+  last: string;
+  /** Packets heard. */
+  count: number;
+}
+
 export interface Device {
   id: string;
   kind: DeviceKind;
@@ -57,6 +76,7 @@ export class GatewayBridge {
   /** The level a channel light was last on at, to go back to when switched on. */
   private readonly lastLevel = new Map<string, number>();
   private readonly reads = new Map<number, NodeJS.Timeout>();
+  private readonly seen = new Map<number, { channels: Set<number>; presets: Set<number>; thermostat: boolean; temperature?: number; last: Date; count: number }>();
   private pollTimer?: NodeJS.Timeout;
   private live?: DynetLive;
   private stopped = false;
@@ -132,6 +152,7 @@ export class GatewayBridge {
 
   handleEvent(event: DynetEvent): void {
     if (!('area' in event) || event.area === undefined) return;
+    this.note(event.area, event);
     const devices = this.byArea.get(event.area);
     if (!devices) return; // not an area this bridge shows
 
@@ -166,6 +187,43 @@ export class GatewayBridge {
       default:
         return; // questions, the time, what is not known: nothing to show
     }
+  }
+
+  /** Every area the bus has said something about since start, newest first. */
+  seenAreas(): SeenArea[] {
+    return [...this.seen.entries()]
+      .map(([area, s]) => {
+        const config = this.gateway.areas.find((a) => a.area === area);
+        return {
+          area,
+          channels: [...s.channels].sort((a, b) => a - b),
+          presets: [...s.presets].sort((a, b) => a - b),
+          thermostat: s.thermostat,
+          ...(s.temperature !== undefined ? { temperature: s.temperature } : {}),
+          ...(config ? { configured: config.type } : {}),
+          last: s.last.toISOString(),
+          count: s.count,
+        };
+      })
+      .sort((a, b) => a.area - b.area);
+  }
+
+  private note(area: number, event: DynetEvent): void {
+    let s = this.seen.get(area);
+    if (!s) {
+      s = { channels: new Set(), presets: new Set(), thermostat: false, last: new Date(), count: 0 };
+      this.seen.set(area, s);
+    }
+    s.last = new Date();
+    s.count++;
+    if (event.kind === 'channel' && event.channel !== undefined) s.channels.add(event.channel);
+    if (event.kind === 'request' && event.asks === 'level' && event.channel !== undefined) s.channels.add(event.channel);
+    if (event.kind === 'preset' && event.channel === undefined) s.presets.add(event.preset);
+    if (event.kind === 'temperature') {
+      s.thermostat = true;
+      s.temperature = event.temperature;
+    }
+    if (event.kind === 'setpoint') s.thermostat = true;
   }
 
   // -- reading -----------------------------------------------------------------

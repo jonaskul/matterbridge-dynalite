@@ -50,6 +50,18 @@ Restart Matterbridge, open the plugin's settings and add your gateway(s).
 
 ## Configuration
 
+### The settings page
+
+The plugin has a settings page of its own: the globe button by the plugin in Matterbridge's plugin list opens it (double-click it for a tab of its own). There you can:
+
+- add gateways, areas and channels, each area on one row with only the fields its type uses;
+- **Test connection**: the gateway's web pages and its DyNet port are tried before you save, and a port that connects but carries nothing is pointed out (it needs routes in the gateway);
+- see what is **heard on the bus**: every area since the plugin started, with its channels, presets or temperature, added with one click.
+
+Saved settings take effect when Matterbridge restarts. Matterbridge's own configuration dialog edits the same settings.
+
+### The settings file
+
 Everything is set in the plugin's settings in the Matterbridge frontend, and saved as `matterbridge-dynalite.config.json`:
 
 ```json

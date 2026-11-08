@@ -1,6 +1,6 @@
 {
   "name": "matterbridge-dynalite",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Matterbridge Signify Dynalite plugin",
   "author": "https://github.com/jonaskul",
   "license": "Apache-2.0",
@@ -9,6 +9,7 @@
   "types": "dist/module.d.ts",
   "files": [
     "dist",
+    "apps/frontend/build",
     "matterbridge-dynalite.schema.json",
     "matterbridge-dynalite.config.json",
     "README.md",
