@@ -5,8 +5,8 @@ name: Publish
 # "Install plugin" finds it, once a maintainer approves it with 2FA on
 # npmjs.com (Staged Packages) or with `npm stage approve <id>`.
 
-# Or run by hand on a tag (Actions → Publish → Run workflow, "Use workflow
-# from" the tag, e.g. v0.2.0): it stages the version, then makes the release.
+# Or run by hand (Actions → Publish → Run workflow, on main): it stages the
+# version in package.json, then makes its release and tag (v<version>).
 on:
   release:
     types: [published]
@@ -38,6 +38,7 @@ jobs:
         run: npm install -g npm@latest
 
       - name: The release tag is the package's version
+        if: github.event_name == 'release'
         run: |
           tag="${GITHUB_REF_NAME#v}"
           version="$(node -p 'require("./package.json").version')"
@@ -80,5 +81,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          notes="$(awk -v v="## ${GITHUB_REF_NAME#v} " 'index($0, v) == 1 { on = 1; next } on && /^## / { exit } on' CHANGELOG.md)"
-          gh release create "$GITHUB_REF_NAME" --title "${GITHUB_REF_NAME#v}" --notes "${notes:-See CHANGELOG.md.}" --verify-tag
+          version="$(node -p 'require("./package.json").version')"
+          notes="$(awk -v v="## $version " 'index($0, v) == 1 { on = 1; next } on && /^## / { exit } on' CHANGELOG.md)"
+          gh release create "v$version" --target "$GITHUB_SHA" --title "$version" --notes "${notes:-See CHANGELOG.md.}"
