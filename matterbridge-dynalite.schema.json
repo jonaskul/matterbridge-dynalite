@@ -1,6 +1,6 @@
 {
   "title": "Matterbridge Dynalite plugin",
-  "description": "Easier: the plugin's own settings page (the globe button by the plugin in the list) tests the gateway and lists the areas and channels heard on the bus, to add with a click.",
+  "description": "Signify Dynalite lights and heating, straight from the Ethernet gateway.",
   "type": "object",
   "properties": {
     "name": { "title": "Plugin Name", "type": "string", "readOnly": true, "ui:widget": "hidden" },
@@ -8,7 +8,7 @@
     "version": { "title": "Plugin Version", "type": "string", "readOnly": true, "ui:widget": "hidden" },
     "gateways": {
       "title": "Gateways",
-      "description": "One entry per Dynalite Ethernet gateway (PDEG, DDNG and similar).",
+      "description": "One entry per Dynalite Ethernet gateway (PDEG, DDNG and similar). Easier: the plugin's own settings page, opened with the globe button by the plugin in the list, tests the gateway and lists the areas and channels heard on the bus, to add with a click.",
       "type": "array",
       "items": {
         "type": "object",
@@ -32,7 +32,7 @@
             "default": false
           },
           "username": { "title": "Username", "description": "Only if the gateway asks for HTTP authentication.", "type": "string" },
-          "password": { "title": "Password", "type": "string", "ui:widget": "password" },
+          "password": { "title": "Password", "type": "string", "format": "password", "ui:widget": "password" },
           "dynetPort": {
             "title": "DyNet TCP port (live updates)",
             "description": "A TCP server port set up on the gateway (connection Trunk, DyNet 1 or DyNet2), e.g. 50000. Changes made anywhere — wall panels, timers, other apps — then show at once. Leave empty to rely on polling. If another program already uses that port, give this plugin a port of its own.",

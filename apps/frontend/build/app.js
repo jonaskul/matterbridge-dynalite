@@ -345,6 +345,7 @@ function seenPanel(gw, gi) {
   const rows = mine.areas.map((s) => {
     const known = gw.areas.find((a) => a.area === s.area);
     const bits = [
+      !s.thermostat && !s.channels.length && !s.checked ? 'asking the gateway …' : null,
       s.thermostat ? `thermostat${s.temperature !== undefined ? `, ${s.temperature.toFixed(1)} °C` : ''}` : null,
       s.channels.length ? `channels ${s.channels.join(', ')}` : null,
       s.presets.length ? `presets ${s.presets.join(', ')}` : null,
@@ -352,7 +353,10 @@ function seenPanel(gw, gi) {
     const acts = known
       ? [h('span', { class: 'tag' }, 'added'), ...addMissingChannels(known, s)]
       : [
-          s.thermostat ? h('button', { type: 'button', class: 'small', onclick: () => addArea(gw, { area: s.area, name: `Area ${s.area}`, type: 'thermostat' }) }, 'Add as thermostat') : null,
+          // Presets only, and the gateway not asked yet: heating areas tell presets too, so either.
+          s.thermostat || (!s.channels.length && !s.checked)
+            ? h('button', { type: 'button', class: 'small', onclick: () => addArea(gw, { area: s.area, name: `Area ${s.area}`, type: 'thermostat' }) }, 'Add as thermostat')
+            : null,
           // A thermostat that told no channel is no light.
           s.thermostat && !s.channels.length
             ? null

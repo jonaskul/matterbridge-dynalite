@@ -40,8 +40,10 @@ export interface SeenArea {
   channels: number[];
   /** Presets chosen or told. */
   presets: number[];
-  /** A temperature or setpoint was told: a thermostat. */
+  /** A temperature or setpoint was told, or the gateway gave one when asked: a thermostat. */
   thermostat: boolean;
+  /** The gateway was asked whether it has a temperature (for an area the bus told only presets of). */
+  checked: boolean;
   /** The last temperature told, °C. */
   temperature?: number;
   /** Set up in this plugin already (as what). */
@@ -77,6 +79,8 @@ export class GatewayBridge {
   private readonly lastLevel = new Map<string, number>();
   private readonly reads = new Map<number, NodeJS.Timeout>();
   private readonly seen = new Map<number, { channels: Set<number>; presets: Set<number>; thermostat: boolean; temperature?: number; last: Date; count: number }>();
+  /** Areas whose temperature the gateway was asked for, and the answer (undefined: none). */
+  private readonly asked = new Map<number, number | undefined>();
   private pollTimer?: NodeJS.Timeout;
   private live?: DynetLive;
   private stopped = false;
@@ -199,6 +203,7 @@ export class GatewayBridge {
           channels: [...s.channels].sort((a, b) => a - b),
           presets: [...s.presets].sort((a, b) => a - b),
           thermostat: s.thermostat,
+          checked: this.asked.has(area),
           ...(s.temperature !== undefined ? { temperature: s.temperature } : {}),
           ...(config ? { configured: config.type } : {}),
           last: s.last.toISOString(),
@@ -206,6 +211,31 @@ export class GatewayBridge {
         };
       })
       .sort((a, b) => a.area - b.area);
+  }
+
+  /**
+   * Heating areas tell their presets on the bus as lights do, and a temperature
+   * only now and then: the gateway is asked, once per area, whether the areas
+   * the bus told only presets of have one. Settles when every ask has an answer.
+   */
+  async identify(): Promise<void> {
+    const open = [...this.seen.entries()].filter(
+      ([area, s]) => !s.thermostat && s.channels.size === 0 && !this.asked.has(area) && !this.gateway.areas.some((a) => a.area === area),
+    );
+    for (const [area, s] of open) {
+      this.asked.set(area, undefined);
+      try {
+        const t = await this.api.getTemperature(area);
+        this.asked.set(area, t);
+        if (t !== undefined) {
+          s.thermostat = true;
+          s.temperature ??= t;
+        }
+      } catch (err) {
+        // No answer: taken for no thermostat, and not asked again, to keep the gateway free for commands.
+        this.log.debug(`${this.gateway.name}: area ${area}: ${(err as Error).message}`);
+      }
+    }
   }
 
   private note(area: number, event: DynetEvent): void {

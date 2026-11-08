@@ -138,6 +138,8 @@ export class DynalitePlatform extends MatterbridgeDynamicPlatform {
       return { saved: true, problems: readConfig(next).problems };
     }
     if (path === 'seen' && method === 'GET') {
+      // Not waited for: what the gateway answers shows at the page's next look.
+      for (const b of this.bridges) void b.identify();
       return this.bridges.map((b) => ({
         gateway: b.gateway.name,
         live: b.gateway.dynetPort ? (b.liveConnected ? 'connected' : 'not connected') : 'off',

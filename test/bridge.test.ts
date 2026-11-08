@@ -194,3 +194,18 @@ describe('what the bus has said', () => {
     expect(seen[2]).toMatchObject({ area: 24, presets: [5], configured: 'light' });
   });
 });
+
+describe('an area the bus told only presets of', () => {
+  it('is asked of the gateway once: a temperature makes it a thermostat', async () => {
+    const { bridge, api } = setup();
+    vi.mocked(api.getTemperature).mockImplementation(async (area: number) => (area === 15 ? 23.1 : undefined));
+    bridge.handleEvent(decode(dynet2Packet([0xac, 0x03, 0x01, 0xc3, 0x00, 0x46, 0x00, 0x0f, 0xff, 0x00, 0x01, 0x00, 0x00, 0x00]))); // area 15: preset 1
+    bridge.handleEvent(decode(dynet2Packet([0xac, 0x03, 0x01, 0xc3, 0x00, 0x46, 0x00, 0x1e, 0xff, 0x00, 0x05, 0x00, 0x00, 0x00]))); // area 30: preset 5
+    expect(bridge.seenAreas().filter((s) => s.area !== 24).map((s) => [s.area, s.thermostat, s.checked])).toEqual([[15, false, false], [30, false, false]]);
+    await bridge.identify();
+    await bridge.identify(); // asked once only
+    expect(bridge.seenAreas().map((s) => [s.area, s.thermostat, s.checked, s.temperature])).toEqual([[15, true, true, 23.1], [30, false, true, undefined]]);
+    expect(api.getTemperature).toHaveBeenCalledTimes(2);
+  });
+});
+

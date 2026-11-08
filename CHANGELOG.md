@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 — 2026-11-08
+
+- Heard on the bus: an area the bus told only presets of is asked of the gateway once whether it has a temperature, so heating areas are offered as thermostats rather than lights. Until it has answered, both are offered.
+- Matterbridge's own dialog: the password is masked (its form did not take the field's widget inside a list), and the Gateways section points to the plugin's own settings page.
+
 ## 0.2.0 — 2026-11-08
 
 - A settings page of the plugin's own, opened with the globe button by the plugin in Matterbridge's list (in a large dialog, full screen on a phone, or a tab of its own):
